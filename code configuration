@@ -1,0 +1,70 @@
+# 1. Cập nhật và cài đặt trọn bộ FRR
+opkg update
+opkg install frr frr-zebra frr-ospfd frr-staticd frr-watchfrr
+
+# 2. Bật tiến trình OSPF (Đổi từ 'no' thành 'yes')
+sed -i 's/ospfd=no/ospfd=yes/g' /etc/frr/daemons
+
+# 3. Kích hoạt và khởi chạy dịch vụ FRR
+/etc/init.d/frr enable
+/etc/init.d/frr restart
+
+# 4. TẮT FIREWALL (Bước mấu chốt để OSPF không bị chặn đứng)
+/etc/init.d/firewall stop
+
+Cấu hình chi tiết trên ROUTER 1
+
+root@OpenWrt:~# vtysh
+OpenWrt# configure terminal
+
+! Đặt tên để đỡ nhầm lẫn (Tùy chọn)
+OpenWrt(config)# hostname Router-1
+
+! Vào cấu hình OSPF
+Router-1(config)# router ospf
+ Router-1(config-router)# ospf router-id 1.1.1.1
+ 
+ ! Quảng bá dải mạng chung kết nối với Router 2 vào Area 0
+ Router-1(config-router)# network 192.168.102.0/24 area 0
+ Router-1(config-router)# exit
+
+Router-1(config)# end
+Router-1# write memory
+
+Cấu hình chi tiết trên ROUTER 2
+
+
+root@OpenWrt:~# vtysh
+OpenWrt# configure terminal
+
+! Đặt tên để phân biệt
+OpenWrt(config)# hostname Router-2
+
+! Bước 2.1: Tạo dải mạng giả lập 10.10.10.0/24 trên cổng loopback 'lo'
+Router-2(config)# interface lo
+ Router-2(config-if)# ip address 10.10.10.1/24
+ Router-2(config-if)# exit
+
+! Bước 2.2: Cấu hình OSPF
+Router-2(config)# router ospf
+ Router-2(config-router)# ospf router-id 2.2.2.2
+ 
+ ! Quảng bá đường chung để bắt tay với Router 1
+ Router-2(config-router)# network 172.16.187.0/24 area 0
+ 
+ ! Quảng bá dải mạng giả lập ra cho Router 1 học
+ Router-2(config-router)# network 10.10.10.0/24 area 0
+ Router-2(config-router)# exit
+
+Router-2(config)# end
+Router-2# write memory
+
+ip 192.168.31.2/24 192.168.31.1
+
+Router-1# show ip ospf neighbor
+Router-1# show ip route
+
+tham khảo giao diện trên CISCO 
+sử dụng nó sao để link được với FRR 
+
+
