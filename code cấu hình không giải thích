@@ -1,0 +1,122 @@
+enable
+configure terminal
+
+vlan 11
+name VLAN_11
+exit
+
+vlan 22
+name VLAN_22
+exit
+
+interface ethernet 0/1
+switchport mode access
+switchport access vlan 11
+no shutdown
+exit
+
+interface ethernet 0/2
+switchport mode access
+switchport access vlan 22
+no shutdown
+exit
+
+interface ethernet 0/0
+switchport trunk encapsulation dot1q
+switchport mode trunk
+no shutdown
+exit
+
+
+
+show ra
+Switch# show vlan brief
+Switch# show interfaces trunk
+Switch# write memory
+
+
+interface eth0
+ ip address 172.16.187.201/24
+ no shutdown
+ exit
+
+config interface 'wan'
+    option device 'eth0'
+    option proto 'dhcp'
+
+config interface 'lan2'
+    option device 'eth1'
+    option proto 'static'
+    list ipaddr '192.168.401.2/24'
+config interface 'lan3'
+    option device 'eth2'
+    option proto 'static'
+    list ipaddr '192.168.402.2/24'
+config interface 'lan1'
+    option device 'eth3'
+    option proto 'static'
+    list ipaddr '192.168.40.2/24'
+
+/etc/init.d/network restart
+
+
+vi /etc/config/network
+
+
+
+/etc/init.d/firewall stop
+/etc/init.d/firewall disable
+
+VPCS> ip 192.168.42.2/24 192.168.42.1
+ip 192.168.102.2/24 192.168.102.1
+
+
+vtysh
+configure terminal
+router ospf
+no network 172.16.187.0/24 area 0
+no network 192.168.10.0/24 area 0
+no network 192.168.20.0/24 area 1
+no network 192.168.101.0/24 area 0
+exit
+end
+write memory
+
+
+vtysh
+configure terminal
+router ospf
+no network 192.168.10.0/24 area 0
+no network 192.168.20.0/24 area 10
+no network 192.168.102.0/24 area 0
+exit
+end
+write memory
+
+vtysh
+configure terminal
+router ospf
+no network 192.168.20.0/24 area 10
+no network 192.168.201.0/24 area 1
+exit
+end
+write memory
+
+vtysh
+configure terminal
+router ospf
+no network 192.168.30.0/24 area 12
+no network 192.168.201.0/24 area 1
+no network 192.168.202.0/24 area 1
+exit
+end
+write memory
+
+vtysh
+configure terminal
+router ospf
+no network 192.168.30.0/24 area 12
+no network 192.168.31.0/24 area 3
+exit
+end
+write memory
