@@ -63,8 +63,3 @@ ip 192.168.31.2/24 192.168.31.1
 
 Router-1# show ip ospf neighbor
 Router-1# show ip route
-
-tham khảo giao diện trên CISCO 
-sử dụng nó sao để link được với FRR 
-
-
